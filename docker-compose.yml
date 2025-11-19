@@ -1,0 +1,124 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: tripme-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: mernAuth
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tripme-network
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: tripme-server
+    restart: unless-stopped
+    ports:
+      - "5001:5000"
+    env_file:
+      - ./server/.env
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/mernAuth
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - tripme-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: tripme-client
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # React runs in browser, needs localhost URL to access backend from host machine
+      - REACT_APP_API_BASE_URL=http://localhost:5001
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      server:
+        condition: service_healthy
+    networks:
+      - tripme-network
+    stdin_open: true
+    tty: true
+
+  blogapp-backend:
+    build:
+      context: ./BlogApp3
+      dockerfile: backend/Dockerfile
+    container_name: tripme-blogapp-backend
+    restart: unless-stopped
+    ports:
+      - "5002:5002"
+    # Before first run, copy BlogApp3/backend/.env.example to BlogApp3/backend/.env and configure your credentials
+    environment:
+      - PORT=5002
+      - MONGO_URI=mongodb://mongodb:27017/mernAuth
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_change_me}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+    volumes:
+      - ./BlogApp3/backend:/app/backend
+      - ./BlogApp3/package.json:/app/package.json
+      - /app/node_modules
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - tripme-network
+
+  blogapp-frontend:
+    build:
+      context: ./BlogApp3/frontend
+      dockerfile: Dockerfile
+    container_name: tripme-blogapp-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    # Before first run, copy BlogApp3/frontend/.env.example to BlogApp3/frontend/.env and configure your API URL
+    # React runs in browser, needs localhost URL to access backend from host machine
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5002
+    volumes:
+      - ./BlogApp3/frontend:/app
+      - /app/node_modules
+    depends_on:
+      - blogapp-backend
+    networks:
+      - tripme-network
+    stdin_open: true
+    tty: true
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  tripme-network:
+    driver: bridge
