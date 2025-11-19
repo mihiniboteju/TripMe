@@ -1,7 +1,3 @@
-# 🐳 TripMe - Docker Setup Guide
-
-Quick guide to run TripMe full-stack application using Docker.
-
 # 🐳 TripMe - Docker Quick Start
 
 Simple guide to run TripMe full-stack application using Docker.
@@ -38,30 +34,30 @@ Access the apps:
 
 5 containerized services:
 - **MongoDB** (port 27017) - Database
-- **Main Backend** (port 5001) - Express API  
+- **Main Backend** (port 5001 mapped from 5000) - Express API  
 - **Main Frontend** (port 3000) - React 18 + Webpack
 - **BlogApp3 Backend** (port 5002) - Blog API
 - **BlogApp3 Frontend** (port 5173) - React 19 + Vite
 
 ## Development Workflow
 
-This repo uses a development-friendly approach:
+This setup is optimized for fast development iteration:
 
-- Dockerfiles are minimal and install dependencies at container startup.
-- Source directories are mounted into containers with anonymous volumes for `node_modules` to avoid host/container binary mismatches.
-- Frontends use hot-reload (Webpack/Vite). Backend changes require a container restart but no image rebuild.
+- **Dependencies**: Installed at build time for faster container startup
+- **Source Code**: Mounted as volumes with hot-reload support (Webpack/Vite)
+- **Node Modules**: Excluded from volume mounts to avoid host/container conflicts
 
-Typical iteration:
+Typical workflow:
 
-Frontend changes: edit files → HMR applies changes instantly.
+**Frontend changes**: Edit files → HMR applies changes instantly
 
-**Backend changes:**
+**Backend changes**:
 ```bash
-docker-compose restart server  # ~40-60s
+docker-compose restart server  # ~5s with pre-installed deps
 ```
 
 **Why so fast?**  
-Volume mounting = no image rebuild needed! See [`docs/DOCKER_SETUP.md`](docs/DOCKER_SETUP.md) for details.
+Volume mounting + build-time deps = no image rebuild needed! See [`docs/DOCKER_SETUP.md`](docs/DOCKER_SETUP.md) for details.
 
 ## Common Commands
 
