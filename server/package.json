@@ -46,9 +46,9 @@
         "test": "cross-env NODE_ENV=test jest --verbose",
         "test:watch": "cross-env NODE_ENV=test jest --watch",
         "test:coverage": "cross-env NODE_ENV=test jest --coverage",
-        "test:unit": "cross-env NODE_ENV=test jest --testPathPattern=tests/unit",
-        "test:integration": "cross-env NODE_ENV=test jest --testPathPattern=tests/integration",
-        "test:e2e": "cross-env NODE_ENV=test jest --testPathPattern=tests/e2e"
+        "test:unit": "cross-env NODE_ENV=test jest tests/unit",
+        "test:integration": "cross-env NODE_ENV=test jest tests/integration",
+        "test:e2e": "cross-env NODE_ENV=test jest tests/e2e"
     },
     "eslintConfig": {
         "extends": [
