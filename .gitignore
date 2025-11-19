@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Environment variables - NEVER commit these files!
+.env
+*/.env
+server/.env
+client/.env
+BlogApp3/backend/.env
+BlogApp3/frontend/.env
+
+# Build outputs
+build/
+dist/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Uploads
+uploads/
+
+# MongoDB data
+data/
