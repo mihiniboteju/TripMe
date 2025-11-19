@@ -10,7 +10,7 @@ services:
     volumes:
       - mongodb_data:/data/db
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet || exit 1
       interval: 10s
       timeout: 5s
       retries: 5
@@ -53,6 +53,7 @@ services:
     ports:
       - "3000:3000"
     environment:
+      # React runs in browser, needs localhost URL to access backend from host machine
       - REACT_APP_API_BASE_URL=http://localhost:5001
       - CHOKIDAR_USEPOLLING=true
     volumes:
@@ -74,6 +75,7 @@ services:
     restart: unless-stopped
     ports:
       - "5002:5002"
+    # Before first run, copy BlogApp3/backend/.env.example to BlogApp3/backend/.env and configure your credentials
     environment:
       - PORT=5002
       - MONGO_URI=mongodb://mongodb:27017/mernAuth
@@ -82,7 +84,8 @@ services:
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     volumes:
-      - ./BlogApp3:/app
+      - ./BlogApp3/backend:/app/backend
+      - ./BlogApp3/package.json:/app/package.json
       - /app/node_modules
     depends_on:
       mongodb:
@@ -98,6 +101,8 @@ services:
     restart: unless-stopped
     ports:
       - "5173:5173"
+    # Before first run, copy BlogApp3/frontend/.env.example to BlogApp3/frontend/.env and configure your API URL
+    # React runs in browser, needs localhost URL to access backend from host machine
     environment:
       - VITE_API_BASE_URL=http://localhost:5002
     volumes:
