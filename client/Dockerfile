@@ -1,11 +1,15 @@
 # Development-optimized Dockerfile for React app
-# Code is mounted as volume, dependencies installed at startup
+# Dependencies installed at build time, code mounted as volume
 FROM node:18-alpine
 
 WORKDIR /app
 
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+
 # Expose port
 EXPOSE 3000
 
-# Install dependencies and start development server at runtime
-CMD npm install --legacy-peer-deps && npm start
+# Start development server (source code mounted via volume)
+CMD ["npm", "start"]
