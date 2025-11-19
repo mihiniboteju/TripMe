@@ -428,7 +428,7 @@ describe('Auth Routes Integration Tests', () => {
 
       validToken = jwt.sign(
         {
-          userId: testUser._id,
+          id: testUser._id,
           username: testUser.username
         },
         process.env.JWT_SECRET,
